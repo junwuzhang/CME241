@@ -1,0 +1,146 @@
+\documentclass[12pt]{article}
+ 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{commath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{gensymb}
+\usepackage{xparse,mathtools}
+\usepackage{color,soul}
+
+%%% --------- packages for glossary ------- %%%
+\usepackage[acronym,nomain,nonumberlist]{glossaries}
+\makeglossaries
+%
+\newacronym{LHS}{LHS}{left-hand side}
+\newacronym{RHS}{RHS}{right-hand side}
+\newacronym{CARA}{CARA}{Constant Absolute Risk-Aversion}
+\newacronym{CRRA}{CRRA}{Constant Relative Risk-Aversion}
+
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+% Select the bibliography file
+\addbibresource{references.bib}
+
+\ExplSyntaxOn
+
+\NewDocumentCommand \vect { s o m }
+ {
+  \IfBooleanTF {#1}
+   { \vectaux*{#3} }
+   { \IfValueTF {#2} { \vectaux[#2]{#3} } { \vectaux{#3} } }
+  ^T
+ }
+
+\DeclarePairedDelimiterX \vectaux [1] {\lbrack} {\rbrack}
+ { \, \dbacc_vect:n { #1 } \, }
+
+\cs_new_protected:Npn \dbacc_vect:n #1
+ {
+  \seq_set_split:Nnn \l_tmpa_seq { , } { #1 }
+  \seq_use:Nn \l_tmpa_seq { \enspace }
+ }
+\ExplSyntaxOff
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\newcommand{\myequation}{\begin{equation}}
+\newcommand{\myendequation}{\end{equation}}
+\let\[\myequation
+\let\]\myendequation
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{solution}
+  {\renewcommand\qedsymbol{$\blacksquare$}\begin{proof}[Solution]}
+  {\end{proof}}
+ 
+\begin{document}
+ 
+\title{Homework \#4}
+\author{Junwu Zhang\\ 
+CME 241: Reinforcement Learning for Finance}
+ 
+\maketitle
+
+\begin{problem}{1}
+\text{ }\\
+Work out (in \LaTeX) the equations for Absolute/Relative Risk Premia for CARA/CRRA respectively
+\end{problem}
+\begin{solution}
+\text{ }\\
+(1) Since risk premia are closely related to one's utility of money, calculate the risk premia, we can perform taylor-expansion on utility $U(x)$ like follows:
+\begin{gather}
+	U(x) \approx U(\bar{x}) + U^{\prime}(\bar{x}) \cdot (x-\bar{x}) + \frac{1}{2}U^{\prime\prime}(\bar{x})\cdot (x-\bar{x})^2 \\
+	U(x_{CE}) \approx U(\bar{x}) + U^{\prime}(\bar{x}) \cdot (x_{CE} - \bar{x})
+\end{gather}
+Since we have $\mathbb{E}[U(x)] = U(x_{CE})$, the left hand side is the expectation of $U(x)$:
+\begin{gather}
+	\mathbb{E}[U(x)] \approx U(\bar{x}) + \frac{1}{2} \cdot U^{\prime\prime}(\bar{x})\cdot \sigma_x^2 = U(x_{CE}) \approx U(\bar{x}) + U^{\prime}(\bar{x}) \cdot (x_{CE} - \bar{x}) \\
+	U^{\prime}(\bar{x}) \cdot (x_{CE} - \bar{x}) \approx \frac{1}{2} \cdot U^{\prime\prime}(\bar{x})\cdot \sigma_x^2
+\end{gather}
+Moving $U^{\prime}(\bar{x})$ to the \gls*{RHS} and $U^{\prime\prime}$ to the \gls*{LHS} of the equation, we have:
+\begin{gather}
+x_{CE} - \bar{x} \approx \frac{1}{2} \cdot \frac{U^{\prime\prime}(\bar{x})}{U^{\prime}(\bar{x})}\cdot \sigma_x^2 \\
+\pi_A = \bar{x} - x_{CE} \approx -\frac{1}{2} \cdot A(\bar{x}) \cdot \sigma_x^2,
+\end{gather}
+where $A(\bar{x}) = \frac{U^{\prime\prime}(\bar{x})}{U^{\prime}(\bar{x})}$.
+
+For \gls{CARA}, consider the utility function $U(x) = \frac{-e^{-ax}}{a}$:
+\begin{gather}
+	U^{\prime}(\bar{x}) = e^{-ax} \\
+	U^{\prime\prime}(\bar{x}) = -a\cdot e^{-ax} \\
+	\frac{U^{\prime\prime}(\bar{x})}{U^{\prime}(\bar{x})} = -a
+\end{gather}
+
+Plug it into the $\pi_A$ equation before, we have: 
+\begin{equation}
+\pi_A = \mu - x_{CE} = -\frac{1}{2} \cdot A(\bar{x}) \cdot \sigma_x^2 = \frac{a\sigma^2}{2}
+\end{equation}
+where $\mu$ is the expected value of the uncertain payment and $x_{CE}$ is the value of certainty equivalent.
+
+Certainty equivalent refers to the amount that a person is willing to pay; in a risk-avert scenario, this value is typically lower than $\mu$. 
+
+(2) For \gls{CRRA}, consider $U(x) = \frac{x^{1-\gamma}}{1-\gamma}$:
+\begin{gather}
+R(x) = \frac{-U^{\prime\prime} \cdot x}{U(x)} = \gamma
+\end{gather}
+When $\gamma \neq 1$:
+\begin{align}
+\mathbb{E}[U(x)] &= \frac{e^{\mu(1-\gamma) + \frac{\sigma^2}{2}(1-\gamma)^2}}{1-\gamma} \\
+&= \frac{e^{(1-\gamma)\cdot (\mu + \frac{\sigma^2}{2}(1-\gamma))}}{1-\gamma}
+\end{align}
+Therefore:
+\begin{align}
+x_{CE} &=e^{\mu + \frac{\sigma^2}{2}(1-\gamma)} \\
+\pi_R &= 1 - \frac{x_{CE}}{\bar{x}} = 1  - \frac{x_{CE}}{\frac{e^{\mu+
+	\frac{\sigma^2}{2}}}{1-e^{-\frac{\sigma^2\gamma}{2}}}} \\
+&= 1 - e^{-\frac{\sigma^2\gamma}{2}}
+\end{align}
+\end{solution}
+
+%\begin{problem}{2-2}
+%\text{ }\\
+%Write the solutions to Portfolio Applications covered in class with precise notation (in \LaTeX)
+%\end{problem}
+%\begin{solution}
+%	
+%\end{solution}
+%\printbibliography
+\end{document}
