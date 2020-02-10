@@ -44,11 +44,11 @@
   <internal package="biblatex" priority="9" active="0">
     <generic>latex</generic>
     <provides type="dynamic">
-      <file>CME241_lect04_Jan_17.aux</file>
-      <file>CME241_lect04_Jan_17-blx.bib</file>
+      <file>CME241_hw04_Jan_17.aux</file>
+      <file>CME241_hw04_Jan_17-blx.bib</file>
     </provides>
     <requires type="dynamic">
-      <file>CME241_lect04_Jan_17.bbl</file>
+      <file>CME241_hw04_Jan_17.bbl</file>
     </requires>
     <requires type="static">
       <file>blx-dm.def</file>
@@ -67,20 +67,20 @@
     <cmdline>
       <binary>bibtex</binary>
       <option>-min-crossrefs 2</option>
-      <infile>CME241_lect04_Jan_17</infile>
+      <infile>CME241_hw04_Jan_17</infile>
     </cmdline>
     <input>
-      <file>CME241_lect04_Jan_17.aux</file>
+      <file>CME241_hw04_Jan_17.aux</file>
     </input>
     <output>
-      <file>CME241_lect04_Jan_17.bbl</file>
+      <file>CME241_hw04_Jan_17.bbl</file>
     </output>
     <provides type="dynamic">
-      <file>CME241_lect04_Jan_17.bbl</file>
+      <file>CME241_hw04_Jan_17.bbl</file>
     </provides>
     <requires type="dynamic">
-      <file>CME241_lect04_Jan_17.aux</file>
-      <file>CME241_lect04_Jan_17-blx.bib</file>
+      <file>CME241_hw04_Jan_17.aux</file>
+      <file>CME241_hw04_Jan_17-blx.bib</file>
     </requires>
     <requires type="editable">
       <file>references.bib</file>

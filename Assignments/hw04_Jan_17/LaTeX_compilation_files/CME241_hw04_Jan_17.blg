@@ -1,11 +1,11 @@
 This is BibTeX, Version 0.99d (TeX Live 2018)
 Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
-The top-level auxiliary file: CME241_lect04_Jan_17.aux
+The top-level auxiliary file: CME241_hw04_Jan_17.aux
 The style file: biblatex.bst
 I couldn't open database file references.bib
----line 20 of file CME241_lect04_Jan_17.aux
- : \bibdata{CME241_lect04_Jan_17-blx,references
- :                                             }
+---line 20 of file CME241_hw04_Jan_17.aux
+ : \bibdata{CME241_hw04_Jan_17-blx,references
+ :                                           }
 I'm skipping whatever remains of this command
 Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
 Reallocated global_strs (elt_size=20001) to 20 items from 10.
@@ -21,13 +21,13 @@ Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
-Database file #1: CME241_lect04_Jan_17-blx.bib
+Database file #1: CME241_hw04_Jan_17-blx.bib
 Biblatex version: 3.8
 Reallocated wiz_functions (elt_size=4) to 9000 items from 6000.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 You've used 1 entry,
             6268 wiz_defined-function locations,
-            1178 strings with 8609 characters,
+            1178 strings with 8603 characters,
 and the built_in function-call counts, 1205 in all, are:
 = -- 58
 > -- 52
