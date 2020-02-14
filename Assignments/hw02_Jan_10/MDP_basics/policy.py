@@ -1,4 +1,4 @@
-from typing import Mapping, Dict, TypeVar
+from typing import Mapping, TypeVar
 import numpy as np
 from scipy.linalg import eig
 from mp import MP
@@ -11,8 +11,8 @@ Policy is a distribution over actions given states
 """
 
 class Policy:
-    def __init__(self, pi: Dict[S, Mapping[A, float]]):
-        self.pi : Dict[S, Mapping[A, float]] = pi
+    def __init__(self, pi: Mapping[S, Mapping[A, float]]):
+        self.pi : Mapping[S, Mapping[A, float]] = pi
 
     def get_state_probabilities(self, state: S) -> Mapping[A, float]:
         return self.pi[state]

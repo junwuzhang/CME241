@@ -1,6 +1,5 @@
 from typing import TypeVar, Sequence, Mapping, Set
 import numpy as np
-from scipy.linalg import eig
 from mp import MP
 
 S = TypeVar('S')
@@ -8,33 +7,33 @@ S = TypeVar('S')
 
 """
 Markov Reward Process is a Markov Chain with values
-MRP is a tuple <S, P, R, gamma> where:
+MRP is a tuple <S, P, R, discount_factor> where:
 S is a finite set of states
 P is a state transition probability matrix
 R is a reward function: Rs = E[R_{t+1} | S_t = S]
-gamma is a discount factor
+discount_factor is a discount factor
 """
 
 class MRP(MP):
-    def __init__(self, transition_data: Mapping[S, Mapping[S, float]], gamma: float):
+    def __init__(self, transition_data: Mapping[S, Mapping[S, float]], discount_factor: float):
         self.reward_function = {}
         self.transition_data : Mapping[S, Mapping[S, float]] = transition_data
         self.states : Sequence[S] = self.getAllStates()   # inherited from MP
         self.terminal_states = self.getTerminalStates()
         self.non_terminal_states = self.getNonterminalStates()
         self.transition_matrix : np.ndarray = self.getTransitionMatrix()   # specific to MRP
-        self.gamma : float = gamma
+        self.discount_factor : float = discount_factor
         self.reward_vector = self.getRewardVector()
 
-    def getTerminalStates(self) -> Set[S]:
+    def getTerminalStates(self) -> Sequence[S]:
         terminal_states = []
         for s, trans_data in self.transition_data.items():
             if len(trans_data) == 1 and s in trans_data.keys():
                 terminal_states.append(s)
         return terminal_states
 
-    def getNonterminalStates(self) -> Set[S]:
-        return [s for s in self.states if s not in self.terminal_states]
+    def getNonterminalStates(self) -> Sequence[S]:
+        return list(set(self.states) - set(self.terminal_states))
     
     # r(s, s') definition
     def setRewardFunctionDeterministic(self, reward_function: Mapping[S, float]) -> None:
@@ -69,7 +68,7 @@ class MRP(MP):
     def getValueFunction(self) -> Mapping[S, float] :
         value_function = {}
         value_function_vector = np.linalg.inv(
-            np.eye(len(self.non_terminal_states)) - self.gamma * self.transition_matrix).dot(self.getRewardVector())
+            np.eye(len(self.non_terminal_states)) - self.discount_factor * self.transition_matrix).dot(self.getRewardVector())
         for idx, state in enumerate(self.non_terminal_states):
             value_function[state] = value_function_vector[idx]
         return value_function
