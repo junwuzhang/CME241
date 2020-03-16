@@ -1,0 +1,104 @@
+\documentclass[12pt]{article}
+ 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{commath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{gensymb}
+\usepackage{xparse,mathtools}
+\usepackage{color,soul}
+\usepackage{enumitem}
+
+%%% --------- packages for glossary ------- %%%
+\usepackage[acronym,nomain,nonumberlist]{glossaries}
+\makeglossaries
+%
+\newacronym{LHS}{LHS}{left-hand side}
+\newacronym{RHS}{RHS}{right-hand side}
+\newacronym{CARA}{CARA}{Constant Absolute Risk-Aversion}
+\newacronym{CRRA}{CRRA}{Constant Relative Risk-Aversion}
+
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+% Select the bibliography file
+\addbibresource{references.bib}
+
+\ExplSyntaxOn
+
+\NewDocumentCommand \vect { s o m }
+ {
+  \IfBooleanTF {#1}
+   { \vectaux*{#3} }
+   { \IfValueTF {#2} { \vectaux[#2]{#3} } { \vectaux{#3} } }
+  ^T
+ }
+
+\DeclarePairedDelimiterX \vectaux [1] {\lbrack} {\rbrack}
+ { \, \dbacc_vect:n { #1 } \, }
+
+\cs_new_protected:Npn \dbacc_vect:n #1
+ {
+  \seq_set_split:Nnn \l_tmpa_seq { , } { #1 }
+  \seq_use:Nn \l_tmpa_seq { \enspace }
+ }
+\ExplSyntaxOff
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\newcommand{\myequation}{\begin{equation}}
+\newcommand{\myendequation}{\end{equation}}
+\let\[\myequation
+\let\]\myendequation
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{solution}
+  {\renewcommand\qedsymbol{$\blacksquare$}\begin{proof}[Solution]}
+  {\end{proof}}
+
+\date{Janurary 15, 2020}
+ 
+\begin{document}
+ 
+\title{Homework \#3}
+\author{Junwu Zhang\\ 
+CME 241: Reinforcement Learning for Finance}
+ 
+\maketitle
+
+\begin{problem}{1}
+	\text{ }\\
+	The programming assignemnts include:
+	\begin{itemize}[noitemsep]
+		\item Write code for Policy Evaluation (tabular) algorithm
+		\item Write code for Policy Iteration (tabular) algorithm
+		\item Write code for Value Iteration (tabular) algorithm
+	\end{itemize}
+\end{problem}
+\begin{solution}
+	\text{ }\\
+	Code for all problems above is shown in folder \verb|/Assignmennts/0_Basic_DP_RL| in files:
+	\begin{itemize}[noitemsep]
+		\item \verb|policy_evaluation.py|
+		\item \verb|policy_iteration.py|
+		\item  \verb|value_iteration.py|
+	\end{itemize}
+\end{solution}
+
+\end{document}

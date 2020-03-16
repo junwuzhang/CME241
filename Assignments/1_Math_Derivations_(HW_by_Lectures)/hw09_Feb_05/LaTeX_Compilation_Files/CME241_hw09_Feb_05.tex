@@ -1,0 +1,129 @@
+\documentclass[12pt]{article}
+ 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{commath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{gensymb}
+\usepackage{xparse,mathtools}
+\usepackage{color,soul}
+\usepackage{enumitem}
+\usepackage{eufrak}
+\usepackage{cleveref}
+%\usepackage{datetime}
+
+%%% --------- packages for glossary ------- %%%
+\usepackage[acronym,nomain,nonumberlist]{glossaries}
+\makeglossaries
+%
+\newacronym{LHS}{LHS}{left-hand side}
+\newacronym{RHS}{RHS}{right-hand side}
+\newacronym{CARA}{CARA}{Constant Absolute Risk-Aversion}
+\newacronym{CRRA}{CRRA}{Constant Relative Risk-Aversion}
+\newacronym{ADP}{ADP}{Approximate Dynamic Programming}
+\newacronym{MDP}{MDP}{Markov Decision Process}
+\newacronym{MO}{MO}{Market Order}
+\newacronym{TOB}{TOB}{Trading Order Book}
+\newacronym{LO}{LO}{limit order}
+\newacronym{PnL}{PnL}{profit-and-loss}
+
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+% Select the bibliography file
+\addbibresource{references.bib}
+
+\ExplSyntaxOn
+
+\NewDocumentCommand \vect { s o m }
+ {
+  \IfBooleanTF {#1}
+   { \vectaux*{#3} }
+   { \IfValueTF {#2} { \vectaux[#2]{#3} } { \vectaux{#3} } }
+  ^T
+ }
+
+\DeclarePairedDelimiterX \vectaux [1] {\lbrack} {\rbrack}
+ { \, \dbacc_vect:n { #1 } \, }
+
+\cs_new_protected:Npn \dbacc_vect:n #1
+ {
+  \seq_set_split:Nnn \l_tmpa_seq { , } { #1 }
+  \seq_use:Nn \l_tmpa_seq { \enspace }
+ }
+\ExplSyntaxOff
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\newcommand{\myequation}{\begin{equation}}
+\newcommand{\myendequation}{\end{equation}}
+\let\[\myequation
+\let\]\myendequation
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{solution}
+  {\renewcommand\qedsymbol{$\blacksquare$}\begin{proof}[Solution]}
+  {\end{proof}}
+ 
+\date{February 04, 2020}
+ 
+\begin{document}
+ 
+\title{Homework \#9}
+\author{Junwu Zhang\\ 
+CME 241: Reinforcement Learning for Finance \\}
+%\date{}
+\maketitle
+
+\begin{problem}{1}
+\text{ }\\
+Write out the full derivation (in LaTeX) of the Avellaneda-Stoikov result we derived in class
+\end{problem}
+\begin{solution}
+\text{ }\\
+In this problem, we are still focusing on the optimal market-making problem. One way to solve it can be the method discussed in the paper by Avellanda and Stoikov in 2006. 
+
+The question is formulated as a \gls{MDP}. In discrete-time notation, we can write the \gls{MDP} as:
+
+\textit{States} are ($t, S_t, W_t, I_t$) where $t$ represents the time step, $S_t$ represents the \gls{TOB} mid price at time $t$, $W_t$ is the Market-maker's trading \gls{PnL} at time $t$, and $I_t$ is the Market-maker’s inventory of shares at time $t$. 
+
+\textit{Actions} is $(P_t^{(b)}, N_t^{(b)}, P_t^{(a)}, N_t^{(a)})$
+
+\textit{\gls{TOB} Price Dynamics} is as follows: 
+\begin{itemize}[noitemsep]
+\item random bid-shares hit $ = X_{t+1}^{(b)} - X_t^{(b)}$ and ask-shares lifted $ = X_{t+1}^{(a)} - X_t^{(a)}$
+\item $W_t \rightarrow W_{t+1}$, $I_t \rightarrow I_{t+1}$
+\item Stochastic update of $S_t$ to $S_{t+1}$
+\end{itemize}
+
+\textit{Reward} at time-step $t+1$ is:
+\begin{equation}
+R_{t+1}:=\left\{\begin{array}{ll}
+0 & \text { for } 1 \leq t+1 \leq T-1 \\
+U\left(W_{t+1}+l_{t+1} \cdot S_{t+1}\right) & \text { for } t+1=T
+\end{array}\right.
+\end{equation}
+
+Therefore, the objective is to find optimal policy $\pi^*(t, S_t, W_t, I_t) = (P_t^{(b)}, N_t^{(b)}, P_t^{(a)}, N_t^{(a)})$ that maximizes $\mathbb{E}[\sum_{t=1}^{T} R_t]$ with discount factor $\gamma=1$. 
+
+Once we have this formulated \gls{MDP}, the discrete-time notation can be converted to the continuous-time setting mentioned in the paper. 
+
+\end{solution}
+
+\end{document}

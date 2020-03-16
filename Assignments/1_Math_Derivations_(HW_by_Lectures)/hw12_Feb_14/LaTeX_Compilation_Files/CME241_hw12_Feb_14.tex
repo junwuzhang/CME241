@@ -1,0 +1,162 @@
+\documentclass[12pt]{article}
+ 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{commath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{gensymb}
+\usepackage{xparse,mathtools}
+\usepackage{color,soul}
+\usepackage{enumitem}
+\usepackage{eufrak}
+\usepackage{cleveref}
+%\usepackage{datetime}
+
+%%% --------- packages for glossary ------- %%%
+\usepackage[acronym,nomain,nonumberlist]{glossaries}
+\makeglossaries
+%
+\newacronym{LHS}{LHS}{left-hand side}
+\newacronym{RHS}{RHS}{right-hand side}
+\newacronym{MDP}{MDP}{Markov Decision Process}
+\newacronym{MO}{MO}{Market Order}
+\newacronym{TOB}{TOB}{Trading Order Book}
+\newacronym{LO}{LO}{limit order}
+\newacronym{PnL}{PnL}{profit-and-loss}
+\newacronym{PG}{PG}{Policy Gradient}
+\newacronym{PGT}{PGT}{Policy Gradient Theorem}
+\newacronym{VF}{VF}{Value Function}
+\newacronym{GLIE}{GLIE}{Greedy in the Limit with Infinite Exploration}
+
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+% Select the bibliography file
+\addbibresource{references.bib}
+
+\ExplSyntaxOn
+
+\NewDocumentCommand \vect { s o m }
+ {
+  \IfBooleanTF {#1}
+   { \vectaux*{#3} }
+   { \IfValueTF {#2} { \vectaux[#2]{#3} } { \vectaux{#3} } }
+  ^T
+ }
+
+\DeclarePairedDelimiterX \vectaux [1] {\lbrack} {\rbrack}
+ { \, \dbacc_vect:n { #1 } \, }
+
+\cs_new_protected:Npn \dbacc_vect:n #1
+ {
+  \seq_set_split:Nnn \l_tmpa_seq { , } { #1 }
+  \seq_use:Nn \l_tmpa_seq { \enspace }
+ }
+\ExplSyntaxOff
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\newcommand{\myequation}{\begin{equation}}
+\newcommand{\myendequation}{\end{equation}}
+\let\[\myequation
+\let\]\myendequation
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{solution}
+  {\renewcommand\qedsymbol{$\blacksquare$}\begin{proof}[Solution]}
+  {\end{proof}}
+ 
+\date{Februray 14, 2020}
+ 
+\begin{document}
+ 
+\title{Homework \#12}
+\author{Junwu Zhang\\ 
+CME 241: Reinforcement Learning for Finance \\}
+%\date{}
+\maketitle
+
+\begin{problem}{1}
+\text{ }\\
+Prove the Epsilon-Greedy Policy Improvement Theorem
+\end{problem}
+\begin{solution}
+\text{ }\\
+
+The $\epsilon$-Greedy Policy Improvement Theorem states:
+\textit{For any $\epsilon$-greedy policy $\pi$, the $\epsilon$-greedy policy $\pi^\prime$ with respect to $q_\pi$ is an improvement, $v_{\pi^{\prime}}(s) \geq v_{\pi}(s)$}
+
+To prove this, we can expand $q_\pi$ and incorporate the $\epsilon$-greedy idea as:
+\begin{equation}
+\begin{aligned}
+q_{\pi}\left(s, \pi^{\prime}(s)\right) &=\sum_{a \in \mathcal{A}} \pi^{\prime}(a | s) q_{\pi}(s, a) \\
+&=\epsilon / m \sum_{a \in \mathcal{A}} q_{\pi}(s, a)+(1-\epsilon) \max _{a \in \mathcal{A}} q_{\pi}(s, a)
+\end{aligned}
+\end{equation}
+
+Expanding the ``greedy'' part of the equation, we have:
+\begin{equation}
+\begin{aligned}
+(1-\epsilon) \max _{a \in \mathcal{A}} q_{\pi}(s, a) \geq (1-\epsilon) \sum_{a \in \mathcal{A}} \frac{\pi(a | s)-\epsilon / m}{1-\epsilon} q_{\pi}(s, a)
+\end{aligned}
+\end{equation}
+
+Relating it with previous expressions, we have:
+\begin{equation}
+\begin{aligned}
+q_{\pi}\left(s, \pi^{\prime}(s)\right) 
+&=\epsilon / m \sum_{a \in \mathcal{A}} q_{\pi}(s, a)+(1-\epsilon) \max _{a \in \mathcal{A}} q_{\pi}(s, a) \\
+& \geq \epsilon / m \sum_{a \in \mathcal{A}} q_{\pi}(s, a)+(1-\epsilon) \sum_{a \in \mathcal{A}} \frac{\pi(a | s)-\epsilon / m}{1-\epsilon} q_{\pi}(s, a) \\
+&=\sum_{a \in \mathcal{A}} \pi(a | s) q_{\pi}(s, a)=v_{\pi}(s)
+\end{aligned}
+\end{equation}
+
+Using policy improvement theorem, we can see that $v_{\pi^{\prime}}(s) \geq v_{\pi}(s)$.	
+\end{solution}
+
+\newpage
+\begin{problem}{2}
+	\text{ }\\
+	Provide (with clear mathematical notation) the definition of \gls{GLIE}
+\end{problem}
+\begin{solution}
+	\gls{GLIE} states that: 
+	\begin{itemize}[noitemsep]
+		\item All state-action pairs are explored infinitely many times,
+		\begin{equation}
+			\lim _{k \rightarrow \infty} N_{k}(s, a)=\infty
+		\end{equation}
+		\item The policy converges on a greedy policy,
+		\begin{equation}
+		\lim _{k \rightarrow \infty} \pi_{k}(a | s)=1\left(a=\underset{a^{\prime} \in \mathcal{A}}{\operatorname{argmax}} Q_{k}\left(s, a^{\prime}\right)\right)
+		\end{equation}
+	\end{itemize}
+\end{solution}
+
+\begin{problem}{3}
+	\text{ }\\
+	Implement the tabular SARSA and tabular SARSA(Lambda) algorithms
+\end{problem}
+\begin{solution}
+	Code is attached separately.
+\end{solution}
+
+
+
+\end{document}

@@ -1,0 +1,309 @@
+\documentclass[12pt]{article}
+ 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{commath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{gensymb}
+\usepackage{xparse,mathtools}
+\usepackage{color,soul}
+\usepackage{enumitem}
+\usepackage{eufrak}
+\usepackage{cleveref}
+%\usepackage{datetime}
+
+%%% --------- packages for glossary ------- %%%
+\usepackage[acronym,nomain,nonumberlist]{glossaries}
+\makeglossaries
+%
+\newacronym{LHS}{LHS}{left-hand side}
+\newacronym{RHS}{RHS}{right-hand side}
+\newacronym{CARA}{CARA}{Constant Absolute Risk-Aversion}
+\newacronym{CRRA}{CRRA}{Constant Relative Risk-Aversion}
+\newacronym{ADP}{ADP}{Approximate Dynamic Programming}
+\newacronym{MDP}{MDP}{Markov Decision Process}
+\newacronym{MO}{MO}{Market Order}
+\newacronym{TOB}{TOB}{Trading Order Book}
+\newacronym{LO}{LO}{limit order}
+\newacronym{PnL}{PnL}{profit-and-loss}
+\newacronym{PG}{PG}{Policy Gradient}
+\newacronym{PGT}{PGT}{Policy Gradient Theorem}
+
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+% Select the bibliography file
+\addbibresource{references.bib}
+
+\ExplSyntaxOn
+
+\NewDocumentCommand \vect { s o m }
+ {
+  \IfBooleanTF {#1}
+   { \vectaux*{#3} }
+   { \IfValueTF {#2} { \vectaux[#2]{#3} } { \vectaux{#3} } }
+  ^T
+ }
+
+\DeclarePairedDelimiterX \vectaux [1] {\lbrack} {\rbrack}
+ { \, \dbacc_vect:n { #1 } \, }
+
+\cs_new_protected:Npn \dbacc_vect:n #1
+ {
+  \seq_set_split:Nnn \l_tmpa_seq { , } { #1 }
+  \seq_use:Nn \l_tmpa_seq { \enspace }
+ }
+\ExplSyntaxOff
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\newcommand{\myequation}{\begin{equation}}
+\newcommand{\myendequation}{\end{equation}}
+\let\[\myequation
+\let\]\myendequation
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{solution}
+  {\renewcommand\qedsymbol{$\blacksquare$}\begin{proof}[Solution]}
+  {\end{proof}}
+ 
+\date{March 04, 2020}
+ 
+\begin{document}
+ 
+\title{Homework \#15}
+\author{Junwu Zhang\\ 
+CME 241: Reinforcement Learning for Finance \\}
+%\date{}
+\maketitle
+
+\begin{problem}{1}
+\text{ }\\
+Write Proof (with precise notation) of the Policy Gradient Theorem
+\end{problem}
+\begin{solution}
+\text{ }\\
+For \gls{PG}, we have the following crucial components to the problem:
+\begin{itemize}[noitemsep]
+	\item \textit{States:} $s_t \in \mathcal{S}$
+	\item \textit{Actions:} $a_t \in \mathcal{A}$
+	\item \textit{Rewards:} $r_t \in \mathbb{R}, \forall t \in \left\{0, 1, 2, \cdots\right\}$
+	\item State Transition Probabilities $\mathcal{P}_{s, s^{\prime}}^{a}=\operatorname{Pr}\left(s_{t+1}=s^{\prime} | s_{t}=s, a_{t}=a\right)$
+	\item Initial State Probability Distribution $p_{0}: \mathcal{S} \rightarrow[0,1]$
+	\item Expected Rewards $\mathcal{R}_{s}^{a}=E\left[r_{t} | s_{t}=s, a_{t}=a\right]$
+	\item Policy Function Approximation $\pi(s, a ; \theta)=\operatorname{Pr}\left(a_{t}=a | s_{t}=s, \theta\right), \theta \in \mathbb{R}^{k}$
+	\item \textit{Discount Factor:} $\gamma$
+\end{itemize}
+The \gls{PGT} can be written as:
+\begin{equation}\label{eq:PGT_eqn}
+\nabla_{\theta} J(\theta)=\int_{\mathcal{S}} \rho^{\pi}(s) \int_{\mathcal{A}} \nabla_{\theta} \pi(s, a ; \theta) \cdot Q^{\pi}(s, a) \cdot d a \cdot d s
+\end{equation}
+where $\rho^{\pi}(s)=\int_{\mathcal{S}} \sum_{t=0}^{\infty} \gamma^{t} \cdot p_{0}\left(s_{0}\right) \cdot p\left(s_{0} \rightarrow s, t, \pi\right) \cdot d s_{0}$. We can it \textit{Discounted-Aggregate State-Visitation Measure}, which is a key function for \gls{PG}. $\rho^{\pi}(s)$ depends on $\theta$. We also note that $\nabla_{\theta} \log \pi(s, a ; \theta)$ is the Score Function.
+
+To prove the \gls{PGT}, we can first write:
+\begin{align}
+J(\theta) &=\int_{\mathcal{S}} p_{0}\left(s_{0}\right) \cdot V^{\pi}\left(s_{0}\right) \cdot d s_{0}\\
+&=\int_{\mathcal{S}} p_{0}\left(s_{0}\right) \int_{\mathcal{A}} \pi\left(s_{0}, a_{0} ; \theta\right) \cdot Q^{\pi}\left(s_{0}, a_{0}\right) \cdot d a_{0} \cdot d s_{0}
+\end{align}
+Then, by calculating $\pi\left(s_{0}, a_{0} ; \theta\right)$ and $Q^{\pi}\left(s_{0}, a_{0}\right)$, we can write $\nabla_{\theta} J(\theta)$ as:
+\begin{equation}
+\begin{aligned}
+\nabla_{\theta} J(\theta) &=\int_{\mathcal{S}} p_{0}\left(s_{0}\right) \int_{\mathcal{A}} \nabla_{\theta} \pi\left(s_{0}, a_{0} ; \theta\right) \cdot Q^{\pi}\left(s_{0}, a_{0}\right) \cdot d a_{0} \cdot d s_{0} \\
+&+\int_{\mathcal{S}} p_{0}\left(s_{0}\right) \int_{\mathcal{A}} \pi\left(s_{0}, a_{0} ; \theta\right) \cdot \nabla_{\theta} Q^{\pi}\left(s_{0}, a_{0}\right) \cdot d a_{0} \cdot d s_{0}
+\end{aligned}
+\end{equation}
+
+Using the Bellman operator, we can expand the action value function $Q^{\pi}\left(s_{0}, a_{0}\right)$ as:
+\begin{equation}\label{eq:bellman_expansion}
+	Q^{\pi}\left(s_{0}, a_{0}\right) = \mathcal{R}_{s_{0}}^{a_{0}}+\int_{\mathcal{S}} \gamma \cdot \mathcal{P}_{s_{0}, s_{1}}^{a_{0}} \cdot V^{\pi}\left(s_{1}\right) \cdot d s_{1}
+\end{equation}
+Plugging \Cref{eq:bellman_expansion} into the original equation, we have:
+\begin{align}
+	\nabla_{\theta} J(\theta)
+	&=\int_{\mathcal{S}} p_{0}\left(s_{0}\right) \int_{\mathcal{A}} \nabla_{\theta} \pi\left(s_{0}, a_{0} ; \theta\right) \cdot Q^{\pi}\left(s_{0}, a\right) \cdot d a_{0} \cdot d s_{0} \\
+	&+\int_{\mathcal{S}} p_{0}\left(s_{0}\right) \int_{\mathcal{A}} \pi\left(s_{0}, a_{0} ; \theta\right) \cdot \nabla_{\theta}\left(\int_{\mathcal{S}} \gamma \cdot \mathcal{P}_{s_{0}, s_{1}}^{a_{0}} \cdot V^{\pi}\left(s_{1}\right) \cdot d s_{1}\right) \cdot d a_{0} \cdot d s_{0}	
+\end{align}
+since $\nabla_{\theta} \mathcal{R}_{s_{0}}^{a_{0}}=0$.
+
+Moving $\nabla_{\theta}$ into $\int_{\mathcal{S}}$, and further moving the outside $\int_{\mathcal{A}}$, we have:
+\begin{equation}
+	\begin{aligned}
+	\nabla_{\theta} J(\theta)
+	&=\int_{\mathcal{S}} p_{0}\left(s_{0}\right) \int_{\mathcal{A}} \nabla_{\theta} \pi\left(s_{0}, a_{0} ; \theta\right) \cdot Q^{\pi}\left(s_{0}, a\right) \cdot d a_{0} \cdot d s_{0} \\
+	&+\int_{\mathcal{S}} p_{0}\left(s_{0}\right) \int_{\mathcal{A}} \pi\left(s_{0}, a_{0} ; \theta\right) \int_{\mathcal{S}} \gamma \cdot \mathcal{P}_{s_{0}, s_{1}}^{a_{0}} \cdot \nabla_{\theta} V^{\pi}\left(s_{1}\right) \cdot d s_{1} \cdot d a_{0} \cdot d s_{0}\\
+	&=\int_{\mathcal{S}} p_{0}\left(s_{0}\right) \int_{\mathcal{A}} \nabla_{\theta} \pi\left(s_{0}, a_{0} ; \theta\right) \cdot Q^{\pi}\left(s_{0}, a_{0}\right) \cdot d a_{0} \cdot d s_{0} \\
+	&+\int_{\mathcal{S}}\left(\int_{\mathcal{S}} \gamma \cdot p_{0}\left(s_{0}\right) \int_{\mathcal{A}} \pi\left(s_{0}, a_{0} ; \theta\right) \cdot \mathcal{P}_{s_{0, s_{1}}}^{a_{0}} \cdot d a_{0} \cdot d s_{0}\right) \cdot \nabla_{\theta} V^{\pi}\left(s_{1}\right) \cdot d s_{1}
+	\end{aligned}
+\end{equation}
+
+We can further expand the above equations to:
+\begin{equation}
+\begin{aligned}
+\nabla_{\theta} J(\theta)
+&=\int_{\mathcal{S}} p_{0}\left(s_{0}\right) \int_{\mathcal{A}} \cdot \nabla_{\theta} \pi\left(s_{0}, a_{0} ; \theta\right) \cdot Q^{\pi}\left(s_{0}, a_{0}\right) \cdot d a_{0} \cdot d s_{0} \\
+&+\int_{\mathcal{S}}\left(\int_{\mathcal{S}} \gamma \cdot p_{0}\left(s_{0}\right) \cdot p\left(s_{0} \rightarrow s_{1}, 1, \pi\right) \cdot d s_{0}\right) \cdot \nabla_{\theta} V^{\pi}\left(s_{1}\right) \cdot d s_{1}
+\end{aligned}
+\end{equation}
+based on the fact that:
+\begin{equation}
+\int_{\mathcal{A}} \pi\left(s_{0}, a_{0} ; \theta\right) \cdot \mathcal{P}_{s_{0}, s_{1}}^{a_{0}} \cdot d a_{0}=p\left(s_{0} \rightarrow s_{1}, 1, \pi\right)
+\end{equation}
+
+Next, expand the above equations to:
+\begin{equation}
+\begin{aligned}
+\nabla_{\theta} J(\theta)
+&=\int_{\mathcal{S}} p_{0}\left(s_{0}\right) \int_{\mathcal{A}} \cdot \nabla_{\theta} \pi\left(s_{0}, a_{0} ; \theta\right) \cdot Q^{\pi}\left(s_{0}, a_{0}\right) \cdot d a \cdot d s_{0} \\
+&+\int_{\mathcal{S}}\left(\int_{\mathcal{S}} \gamma \cdot p_{0}\left(s_{0}\right) p\left(s_{0} \rightarrow s_{1}, 1, \pi\right) d s_{0}\right) \cdot \nabla_{\theta}\left(\int_{\mathcal{A}} \pi\left(s_{1}, a_{1} ; \theta\right) Q^{\pi}\left(s_{1}, a_{1}\right) d a_{1}\right) d s_{1}
+\end{aligned}
+\end{equation}
+based on the fact that:
+\begin{equation}
+V^{\pi}\left(s_{1}\right) = \int_{\mathcal{A}} \pi\left(s_{1}, a_{1} ; \theta\right) \cdot Q^{\pi}\left(s_{1}, a_{1}\right) \cdot d a_{1}
+\end{equation}
+
+We can then split $\pi Q^\pi$ and calculate the gradient of $Q^\pi$ using Bellman expansion, we have:
+\begin{equation}
+	\begin{aligned}
+	\nabla_{\theta} J(\theta)
+	&=\int_{\mathcal{S}} p_{0}\left(s_{0}\right) \int_{\mathcal{A}} \cdot \nabla_{\theta} \pi\left(s_{0}, a_{0} ; \theta\right) \cdot Q^{\pi}\left(s_{0}, a_{0}\right) \cdot d a_{0} \cdot d s_{0} \\
+	&+\int_{\mathcal{S}} \int_{\mathcal{S}} \gamma p_{0}\left(s_{0}\right) p\left(s_{0} \rightarrow s_{1}, 1, \pi\right) d s_{0}\left(\int_{\mathcal{A}} \nabla_{\theta} \pi\left(s_{1}, a_{1} ; \theta\right) Q^{\pi}\left(s_{1}, a_{1}\right) d a_{1}+\ldots\right) d s_{1} \\
+	&=\sum_{t=0}^{\infty} \int_{\mathcal{S}} \int_{\mathcal{S}} \gamma^{t} \cdot p_{0}\left(s_{0}\right) \cdot p\left(s_{0} \rightarrow s_{t}, t, \pi\right) \cdot d s_{0} \int_{\mathcal{A}} \nabla_{\theta} \pi\left(s_{t}, a_{t} ; \theta\right) \cdot Q^{\pi}\left(s_{t}, a_{t}\right) \cdot d a_{t} \cdot d s_{t}
+	\end{aligned}
+\end{equation}
+
+Since we know $\int_{\mathcal{A}} \nabla_{\theta} \pi\left(s_{t}, a_{t} ; \theta\right) \cdot Q^{\pi}\left(s_{t}, a_{t}\right) \cdot d a_{t}$ is independent of $t$, we can move $\sum_{t=0}^{\infty}$ inside the integrals and write:
+\begin{equation}
+	\nabla_{\theta} J(\theta) = \int_{\mathcal{S}} \int_{\mathcal{S}} \sum_{t=0}^{\infty} \gamma^{t} \cdot p_{0}\left(s_{0}\right) \cdot p\left(s_{0} \rightarrow s, t, \pi\right) \cdot ds_{0} \int_{\mathcal{A}} \nabla_{\theta} \pi(s, a ; \theta) \cdot Q^{\pi}(s, a) \cdot da \cdot ds
+\end{equation}
+
+Since we also have:
+\begin{equation}
+	\int_{\mathcal{S}} \sum_{t=0}^{\infty} \gamma^{t} \cdot p_{0}\left(s_{0}\right) \cdot p\left(s_{0} \rightarrow s, t, \pi\right) \cdot d s_{0} \stackrel{\text { def }}{=} \rho^{\pi}(s)
+\end{equation}
+We can finally write the overall equation as:
+\begin{equation}
+	\nabla_{\theta} J(\theta)=\int_{\mathcal{S}} \rho^{\pi}(s) \int_{\mathcal{A}} \nabla_{\theta} \pi(s, a ; \theta) \cdot Q^{\pi}(s, a) \cdot d a \cdot d s
+\end{equation}
+which is the same as \Cref{eq:PGT_eqn}.
+\end{solution}
+
+\begin{problem}{2}
+	\text{ }\\
+	Derive the score function for softmax policy (for finite set of actions)
+\end{problem}
+\begin{solution}
+	Since we know that $\theta$ is $n$-vector and features vector is:
+	\begin{equation}
+	\phi(s, a)=\left(\phi_{1}(s, a), \ldots, \phi_{n}(s, a)\right) \text { for all } s \in \mathcal{S}, a \in \mathcal{A}
+	\end{equation}
+	we can weight the actions by doing a linear combination of all the features, namely $\theta^T \cdot \phi(s, a)$.
+	Then, we can see that action probabilites are proportional to weights exponentiated, which can be written as:
+	\begin{equation}
+		\pi(s, a ; \theta)=\frac{e^{\theta^{\top} \cdot \phi(s, a)}}{\sum_{b} e^{\theta^{T} \cdot \phi(s, b)}} \text { for all } s \in \mathcal{S}, a \in \mathcal{A}
+	\end{equation}
+	By the definition of score function, we can take the logarithm of the above equation, and have:
+	\begin{equation}
+		\nabla_{\theta} \log \pi(s, a ; \theta)=\phi(s, a)-\sum_{b} \pi(s, b ; \theta) \cdot \phi(s, b)=\phi(s, a)-\mathbb{E}_{\pi}[\phi(s, \cdot)]
+	\end{equation}
+\end{solution}
+
+\begin{problem}{3}
+	\text{ }\\
+	Derive the score function for gaussian policy (for continuous actions)
+\end{problem}
+\begin{solution}
+	Slightly differs from the last question, since the action space is now continuous, we have the feature vector as:
+	\begin{equation}
+	\phi(s)=\left(\phi_{1}(s), \ldots, \phi_{n}(s)\right) \text { for all } s \in \mathcal{S}
+	\end{equation}
+	Similar to the last question, we have Gaussian Mean as $\theta^T\cdot\phi(s)$ and with the Gaussian policy $a \sim \mathcal{N}\left(\theta^{T} \cdot \phi(s), \sigma^{2}\right)$ for all $s \in \mathcal{S}$, we have the score function for continuous action space as:
+	\begin{equation}
+		\nabla_{\theta} \log \pi(s, a ; \theta)=\frac{\left(a-\theta^{T} \cdot \phi(s)\right) \cdot \phi(s)}{\sigma^{2}}
+	\end{equation}	
+\end{solution}
+
+\begin{problem}{4}
+	\text{ }\\
+	Write code for the REINFORCE Algoithm (Monte-Carlo Policy Gradient Algorithm, i.e., no Critic)
+\end{problem}
+\begin{solution}
+	Code is attached separately.
+\end{solution}
+
+\begin{problem}{5}
+	\text{ }\\
+	Write Proof (with proper notation) of the Compatible Function Approximation Theorem
+\end{problem}
+\begin{solution}
+	The \textit{Compatible Function Approximation Theorem} states:
+	If the following two conditions are satisfied:
+	\begin{itemize}[noitemsep]
+		\item Critic gradient is compatible with the Actor score function
+		\begin{equation}
+		\nabla_{w} Q(s, a ; w)=\nabla_{\theta} \log \pi(s, a ; \theta)
+		\end{equation}
+		\item Critic parameters $w$ minimize the following mean-squared error:
+		\begin{equation}
+		\epsilon=\int_{\mathcal{S}} \rho^{\pi}(s) \int_{\mathcal{A}} \pi(s, a ; \theta)\left(Q^{\pi}(s, a)-Q(s, a ; w)\right)^{2} \cdot d a \cdot d s
+		\end{equation}
+	\end{itemize}
+	Then the Policy Gradient using critic $Q(s, a ; w)$ is exactly:
+	\begin{equation}\label{eq:theorem_eqn}
+	\nabla_{\theta} J(\theta)=\int_{\mathcal{S}} \rho^{\pi}(s) \int_{\mathcal{A}} \nabla_{\theta} \pi(s, a ; \theta) \cdot Q(s, a ; w) \cdot d a \cdot d s
+	\end{equation}
+	
+	To prove this, we can first use the second point in the theorem and know that:
+	\begin{equation}\label{eq:w_transform_1}
+	\begin{aligned}
+	\int_{\mathcal{S}} \rho^{\pi}(s) \int_{\mathcal{A}} \pi(s, a ; \theta) \cdot\left(Q^{\pi}(s, a)-Q(s, a ; w)\right) \cdot \nabla_{w} Q(s, a ; w) \cdot d a \cdot d s=0 \\
+	\forall w \text{ that minimizes } \epsilon=\int_{\mathcal{S}} \rho^{\pi}(s) \int_{\mathcal{A}} \pi(s, a ; \theta) \cdot\left(Q^{\pi}(s, a)-Q(s, a ; w)\right)^{2} \cdot d a \cdot d s
+	\end{aligned}
+	\end{equation}
+	Using the first bullet point of the theorem which is:
+	\begin{equation}
+	\nabla_{w} Q(s, a ; w)=\nabla_{\theta} \log \pi(s, a ; \theta),
+	\end{equation}
+	we can replace the subscript and have:
+	\begin{equation}\label{eq:w_transform_2}
+		\int_{\mathcal{S}} \rho^{\pi}(s) \int_{\mathcal{A}} \pi(s, a ; \theta) \cdot\left(Q^{\pi}(s, a)-Q(s, a ; w)\right) \cdot \nabla_{\theta} \log \pi(s, a ; \theta) \cdot d a \cdot d s=0
+	\end{equation}
+	Therefore, we can see that \Cref{eq:w_transform_1} and \Cref{eq:w_transform_2} are equal:
+	\begin{equation}\label{eq:w_equals}
+		\begin{aligned}
+		&\int_{\mathcal{S}} \rho^{\pi}(s) \int_{\mathcal{A}} \pi(s, a ; \theta) \cdot Q^{\pi}(s, a) \cdot \nabla_{\theta} \log \pi(s, a ; \theta) \cdot d a \cdot d s \\
+		&= \int_{\mathcal{S}} \rho^{\pi}(s) \int_{\mathcal{A}} \pi(s, a ; \theta) \cdot Q(s, a ; w) \cdot \nabla_{\theta} \log \pi(s, a ; \theta) \cdot d a \cdot d s
+		\end{aligned}
+	\end{equation}	
+	Since we also know:
+	\begin{equation}\label{eq:w_gradient}
+		\nabla_{\theta} J(\theta) =\int_{\mathcal{S}} \rho^{\pi}(s) \int_{\mathcal{A}} \pi(s, a ; \theta) \cdot Q^{\pi}(s, a) \cdot \nabla_{\theta} \log \pi(s, a ; \theta) \cdot d a \cdot d s
+	\end{equation}
+	Combining \Cref{eq:w_equals} and \Cref{eq:w_gradient}, we have:
+	\begin{equation}
+	\begin{aligned}
+	\nabla_{\theta} J(\theta)
+	&=\int_{\mathcal{S}} \rho^{\pi}(s) \int_{\mathcal{A}} \pi(s, a ; \theta) \cdot Q(s, a ; w) \cdot \nabla_{\theta} \log \pi(s, a ; \theta) \cdot d a \cdot d s \\ 
+	&=\int_{\mathcal{S}} \rho^{\pi}(s) \int_{\mathcal{A}} \nabla_{\theta} \pi(s, a ; \theta) \cdot Q(s, a ; w) \cdot d a \cdot d s
+	\end{aligned}
+	\end{equation}
+	and we can see that this is the same as \Cref{eq:theorem_eqn}, therefore the theorem is proved.	
+\end{solution}
+
+\end{document}

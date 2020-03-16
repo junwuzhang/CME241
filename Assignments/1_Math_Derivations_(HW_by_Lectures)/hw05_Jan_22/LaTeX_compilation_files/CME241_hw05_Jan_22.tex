@@ -1,0 +1,120 @@
+\documentclass[12pt]{article}
+ 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{commath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{gensymb}
+\usepackage{xparse,mathtools}
+\usepackage{color,soul}
+%\usepackage{datetime}
+
+%%% --------- packages for glossary ------- %%%
+\usepackage[acronym,nomain,nonumberlist]{glossaries}
+\makeglossaries
+%
+\newacronym{LHS}{LHS}{left-hand side}
+\newacronym{RHS}{RHS}{right-hand side}
+\newacronym{CARA}{CARA}{Constant Absolute Risk-Aversion}
+\newacronym{CRRA}{CRRA}{Constant Relative Risk-Aversion}
+
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+% Select the bibliography file
+\addbibresource{references.bib}
+
+\ExplSyntaxOn
+
+\NewDocumentCommand \vect { s o m }
+ {
+  \IfBooleanTF {#1}
+   { \vectaux*{#3} }
+   { \IfValueTF {#2} { \vectaux[#2]{#3} } { \vectaux{#3} } }
+  ^T
+ }
+
+\DeclarePairedDelimiterX \vectaux [1] {\lbrack} {\rbrack}
+ { \, \dbacc_vect:n { #1 } \, }
+
+\cs_new_protected:Npn \dbacc_vect:n #1
+ {
+  \seq_set_split:Nnn \l_tmpa_seq { , } { #1 }
+  \seq_use:Nn \l_tmpa_seq { \enspace }
+ }
+\ExplSyntaxOff
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\newcommand{\myequation}{\begin{equation}}
+\newcommand{\myendequation}{\end{equation}}
+\let\[\myequation
+\let\]\myendequation
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{solution}
+  {\renewcommand\qedsymbol{$\blacksquare$}\begin{proof}[Solution]}
+  {\end{proof}}
+ 
+\date{Janurary 22 , 2020}
+ 
+\begin{document}
+ 
+\title{Homework \#5}
+\author{Junwu Zhang\\ 
+CME 241: Reinforcement Learning for Finance \\}
+%\date{}
+\maketitle
+
+\begin{problem}{1}
+\text{ }\\
+Model Merton's Portfolio problem as an MDP (write the model in \LaTeX)
+\end{problem}
+\begin{solution}
+\text{ }\\
+\textit{States} are: current wealth $W_t$
+
+\textit{Actions} are:
+\begin{equation} 
+\text{Allocation of wealth:}
+\begin{cases}
+\text{Fraction of wealth allocated to risky assets: } \pi(t, W_t) \\
+\text{Fraction of wealth allocated to riskless assets: } 1-\pi(t, W_t)
+\end{cases}
+\end{equation}
+and wealth consumption per unit time $c(t, W_t)$.
+
+%\textit{Transition functions} are:
+
+\textit{Rewards per unit time (utility)} are:
+\begin{equation}
+U(x) = 
+\begin{cases}
+\frac{x^{1-\gamma}}{1-\gamma} \text{ for } 0 < \gamma \neq 1 \\
+\log(x) \text{ for } \gamma = 1
+\end{cases} 
+\end{equation}
+
+\textit{Discount factor} is: Relative Risk-Aversion constant
+\begin{equation}
+	\gamma = -\frac{x \cdot U^{\prime\prime}(x)}{U^\prime(x)}
+\end{equation}
+\end{solution}
+
+\end{document}

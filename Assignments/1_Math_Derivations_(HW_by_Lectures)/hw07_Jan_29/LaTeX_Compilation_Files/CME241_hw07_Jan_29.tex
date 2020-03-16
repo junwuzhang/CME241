@@ -1,0 +1,119 @@
+\documentclass[12pt]{article}
+ 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{commath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{gensymb}
+\usepackage{xparse,mathtools}
+\usepackage{color,soul}
+\usepackage{enumitem}
+\usepackage{eufrak}
+%\usepackage{datetime}
+
+%%% --------- packages for glossary ------- %%%
+\usepackage[acronym,nomain,nonumberlist]{glossaries}
+\makeglossaries
+%
+\newacronym{LHS}{LHS}{left-hand side}
+\newacronym{RHS}{RHS}{right-hand side}
+\newacronym{CARA}{CARA}{Constant Absolute Risk-Aversion}
+\newacronym{CRRA}{CRRA}{Constant Relative Risk-Aversion}
+\newacronym{ADP}{ADP}{Approximate Dynamic Programming}
+\newacronym{MDP}{MDP}{Markov Decision Process}
+
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+% Select the bibliography file
+\addbibresource{references.bib}
+
+\ExplSyntaxOn
+
+\NewDocumentCommand \vect { s o m }
+ {
+  \IfBooleanTF {#1}
+   { \vectaux*{#3} }
+   { \IfValueTF {#2} { \vectaux[#2]{#3} } { \vectaux{#3} } }
+  ^T
+ }
+
+\DeclarePairedDelimiterX \vectaux [1] {\lbrack} {\rbrack}
+ { \, \dbacc_vect:n { #1 } \, }
+
+\cs_new_protected:Npn \dbacc_vect:n #1
+ {
+  \seq_set_split:Nnn \l_tmpa_seq { , } { #1 }
+  \seq_use:Nn \l_tmpa_seq { \enspace }
+ }
+\ExplSyntaxOff
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\newcommand{\myequation}{\begin{equation}}
+\newcommand{\myendequation}{\end{equation}}
+\let\[\myequation
+\let\]\myendequation
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{solution}
+  {\renewcommand\qedsymbol{$\blacksquare$}\begin{proof}[Solution]}
+  {\end{proof}}
+ 
+\date{January 29, 2020}
+ 
+\begin{document}
+ 
+\title{Homework \#7}
+\author{Junwu Zhang\\ 
+CME 241: Reinforcement Learning for Finance \\}
+%\date{}
+\maketitle
+
+\begin{problem}{3}
+\text{ }\\
+Explore/Discuss an Approximate Dynamic Programming solution as an alternative to Longstaff-Schwartz Algorithm.
+\end{problem}
+\begin{solution}
+\text{ }\\
+Longstaff-Schwartz algorithm combines 3 ideas:
+\begin{itemize}[noitemsep]
+\item Valuation based on Monte-Carlo simulation
+\item Function approximation of continuation value for in-the-money states
+\item Backward-recursive determination of early exercise states
+\end{itemize}
+
+Another possible \gls{ADP} method for American options is by Tsitsiklis and Van Roy on regression methods for American-style options pricing. In this method, the problem can be simplified to optimal stopping. 
+
+The \gls{MDP} can be modeled as:
+
+\textit{States} are: $x$ that represents a risk-neutral state process that is assumed to be Markov, where $x$ is constrained to be: $x_t \in \mathfrak{R}^d \vert 0 \leq t \leq T$.
+
+\textit{Actions} is: $t$, more specifically, the optimal time to stop (in other words, \textit{exercise}) the option
+
+\textit{Rewards}: The reward equal to the intrinsic value of the option, discounted at the risk-free rate, is received at termination. The expected reward is therefore the price of the option, given by:
+\begin{equation}
+\sup_{\tau\in[0, \mathcal{T}]}\mathnormal{E}[(e^-{r\tau}g(x_\tau))]
+\end{equation}
+where $x_t$ is defined in the states section above, $r$ is the risk-free interest raate (assumed to be a known constant), $g(x)$ is the intrinsic value of the option when the state is $x$ and $\mathcal{T}$ is the final expiration time.
+
+In terms of \textit{approximation}, the authors argue that the first step is to introduce a parameterized value function, so we need to choose for each $n$, a parameter vector $r_n$ so that $\tilde{J}(x, r_n) \approx J_n(x)$. For algorithms that compute appropriate parameter values, the author discussed several possible variants of value iteration. The approximation architecture based on features are not discussed due to lack of analytical trackability. Rather, the authors discussed approximation of value function itself. Sample-based projection and Q-values are also discussed, and a version of approximate value iteration is defined. The authors looked into the error accumulation of such approximation and how to resolve the errors, and eventually experimented the algorithms on simulated American options trading and received good results. 
+\end{solution}
+
+\end{document}

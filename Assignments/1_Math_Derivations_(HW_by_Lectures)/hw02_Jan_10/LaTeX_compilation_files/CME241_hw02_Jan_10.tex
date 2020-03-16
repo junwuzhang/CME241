@@ -1,0 +1,120 @@
+\documentclass[12pt]{article}
+ 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{commath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{gensymb}
+\usepackage{xparse,mathtools}
+\usepackage{color,soul}
+\usepackage{enumitem}
+
+%%% --------- packages for glossary ------- %%%
+\usepackage[acronym,nomain,nonumberlist]{glossaries}
+\makeglossaries
+%
+\newacronym{LHS}{LHS}{left-hand side}
+\newacronym{RHS}{RHS}{right-hand side}
+\newacronym{CARA}{CARA}{Constant Absolute Risk-Aversion}
+\newacronym{CRRA}{CRRA}{Constant Relative Risk-Aversion}
+
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+% Select the bibliography file
+\addbibresource{references.bib}
+
+\ExplSyntaxOn
+
+\NewDocumentCommand \vect { s o m }
+ {
+  \IfBooleanTF {#1}
+   { \vectaux*{#3} }
+   { \IfValueTF {#2} { \vectaux[#2]{#3} } { \vectaux{#3} } }
+  ^T
+ }
+
+\DeclarePairedDelimiterX \vectaux [1] {\lbrack} {\rbrack}
+ { \, \dbacc_vect:n { #1 } \, }
+
+\cs_new_protected:Npn \dbacc_vect:n #1
+ {
+  \seq_set_split:Nnn \l_tmpa_seq { , } { #1 }
+  \seq_use:Nn \l_tmpa_seq { \enspace }
+ }
+\ExplSyntaxOff
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\newcommand{\myequation}{\begin{equation}}
+\newcommand{\myendequation}{\end{equation}}
+\let\[\myequation
+\let\]\myendequation
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{solution}
+  {\renewcommand\qedsymbol{$\blacksquare$}\begin{proof}[Solution]}
+  {\end{proof}}
+
+\date{Janurary 10, 2020}
+ 
+\begin{document}
+ 
+\title{Homework \#2}
+\author{Junwu Zhang\\ 
+CME 241: Reinforcement Learning for Finance}
+ 
+\maketitle
+
+\begin{problem}{1}
+\text{ }\\
+Write out the MP/MRP/MDP/Policy definitions and MRP/MDP Value Function definitions in your own style/notation (so you really internalize these concepts)
+\end{problem}
+\begin{solution}
+\text{ }\\
+\begin{itemize}[noitemsep]
+	\item MP: Markov Process; a random process where the current state depend only on the most recent state
+	\item MRP: Markov Reward Process; a sequence of possible Markov states with values in each state and probabilities from one state to another
+	\item MDP: Markov Decision Process; a Markov Reward Process with decisions, in other words, the transition of states does not rely solely on probabilities, rather, they depend on decisions made when being in a state
+	\item Policy: a sequence of decisions made in a Markov Decision Process
+	\item MRP Value Function: The expected (sum of) return, starting from state s
+	in an MDP, and follow the policy $\pi$
+	\item MDP Value Function: The expected (sum of) return, starting from state s
+	in an MDP, taking action a at each state, and follow the policy $\pi$
+\end{itemize}
+\end{solution}
+
+\begin{problem}{2}
+	\text{ }\\
+	The programming assignemnts include:
+	\begin{itemize}[noitemsep]
+		\item Implement MP/MRP/MDP/Policy definitions in code
+		\item Separately implement/convert two reward definitions of MRP
+		\item Write code to create a MRP given a MDP and a Policy
+		\item Write code for MRP/MDP Bellman Equations
+		\item MRP value function
+		\item Stationary distribuion of MP
+	\end{itemize}
+\end{problem}
+\begin{solution}
+	\text{ }\\
+	Code for all problems above is shown in folder \verb|/Assignmennts/0_Basic_DP_RL| in files \verb|mp.py|, \verb|mrp.py|, \verb|policy.py| and \verb|mdp.py|.
+\end{solution}
+
+\end{document}

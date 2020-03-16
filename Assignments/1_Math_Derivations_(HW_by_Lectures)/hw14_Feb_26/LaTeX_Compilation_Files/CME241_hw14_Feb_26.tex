@@ -1,0 +1,183 @@
+\documentclass[12pt]{article}
+ 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{commath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{gensymb}
+\usepackage{xparse,mathtools}
+\usepackage{color,soul}
+\usepackage{enumitem}
+\usepackage{eufrak}
+\usepackage{cleveref}
+%\usepackage{datetime}
+
+%%% --------- packages for glossary ------- %%%
+\usepackage[acronym,nomain,nonumberlist]{glossaries}
+\makeglossaries
+%
+\newacronym{LHS}{LHS}{left-hand side}
+\newacronym{RHS}{RHS}{right-hand side}
+\newacronym{MDP}{MDP}{Markov Decision Process}
+\newacronym{MO}{MO}{Market Order}
+\newacronym{TOB}{TOB}{Trading Order Book}
+\newacronym{LO}{LO}{limit order}
+\newacronym{PnL}{PnL}{profit-and-loss}
+\newacronym{PG}{PG}{Policy Gradient}
+\newacronym{PGT}{PGT}{Policy Gradient Theorem}
+\newacronym{VF}{VF}{Value Function}
+
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+% Select the bibliography file
+\addbibresource{references.bib}
+
+\ExplSyntaxOn
+
+\NewDocumentCommand \vect { s o m }
+ {
+  \IfBooleanTF {#1}
+   { \vectaux*{#3} }
+   { \IfValueTF {#2} { \vectaux[#2]{#3} } { \vectaux{#3} } }
+  ^T
+ }
+
+\DeclarePairedDelimiterX \vectaux [1] {\lbrack} {\rbrack}
+ { \, \dbacc_vect:n { #1 } \, }
+
+\cs_new_protected:Npn \dbacc_vect:n #1
+ {
+  \seq_set_split:Nnn \l_tmpa_seq { , } { #1 }
+  \seq_use:Nn \l_tmpa_seq { \enspace }
+ }
+\ExplSyntaxOff
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\newcommand{\myequation}{\begin{equation}}
+\newcommand{\myendequation}{\end{equation}}
+\let\[\myequation
+\let\]\myendequation
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{solution}
+  {\renewcommand\qedsymbol{$\blacksquare$}\begin{proof}[Solution]}
+  {\end{proof}}
+ 
+\date{Februray 26, 2020}
+ 
+\begin{document}
+ 
+\title{Homework \#14}
+\author{Junwu Zhang\\ 
+CME 241: Reinforcement Learning for Finance \\}
+%\date{}
+\maketitle
+
+\begin{problem}{1}
+\text{ }\\
+Write with proper notation, the derivations to solutions of Linear Systems for Bellman Error-minimization and Projected Bellman Error-minimization
+\end{problem}
+\begin{solution}
+\text{ }\\
+In this problem, we are discussing Value Function Geometry. First, let's list down the important components for this problem with proper mathematical notations:
+\begin{itemize} [noitemsep]
+	\item \textit{States:} $\mathcal{S}: \left\{s_1, s_2, \cdots, s_n\right\}$($n$ states) 
+	\item \textit{Actions:} $\mathcal{A}: \left\{a_1, a_2, \cdots, a_n\right\}$(finite amount of actions)
+	\item \textit{Policy:} fixed (often stochastic) policy denoted $\pi(a\vert s)$
+	\item \textit{Feature functions:} there are $m$ feature functions $\phi_1, \phi_2, \cdots, \phi_m : \mathcal{S}\rightarrow\mathbb{R}$
+	\item \textit{\gls{VF}:} for given policy $\pi$,  $\mathbf{v}_\pi : \mathcal{S} \rightarrow \mathbb{R}$
+	\item \textit{Weights:} $\mathbf{w}=\left(w_{1}, w_{2}, \ldots, w_{m}\right)$
+	\item The corresponding \gls{VF} with linear function approximation can be defined as:
+	\begin{equation}
+		\mathbf{v}_{\mathbf{w}}(s)=\mathbf{w}^{T} \cdot \phi(s)=\sum_{j=1}^{m} w_{j} \cdot \phi_{j}(s), \forall s \in \mathcal{S}
+	\end{equation}
+	\item \textit{Probability distribution:} $\mu_\pi : \mathcal{S}\rightarrow \left[0, 1\right]$
+	\item \textit{Expected Reward:} $r(s, a)$
+	\begin{equation}
+		\mathbf{R}_{\pi}(s) =\sum_{a \in \mathcal{A}} \pi(a | s) \cdot r(s, a)
+	\end{equation}
+	where $\mathbf{R}_{\pi}(s)$ is the vector $\left[\mathbf{R}_{\pi}\left(s_{1}\right), \mathbf{R}_{\pi}\left(s_{2}\right), \ldots, \mathbf{R}_{\pi}\left(s_{n}\right)\right]$
+	\item \textit{Transition probability:} $p(s, s^\prime, a)$ is the probabilty that state $s$ transition to state $s^\prime$ given action $a$
+	\begin{equation}
+		\mathbf{P}_{\pi}\left(s, s^{\prime}\right) =\sum_{a \in \mathcal{A}} \pi(a | s) \cdot p\left(s, s^{\prime}, a\right)
+	\end{equation}
+	where $\mathbf{P}_{\pi}$ is the matrix $\left[\mathbf{P}_{\pi}\left(s_{i}, s_{i^{\prime}}\right)\right], 1 \leq i, i^{\prime} \leq n$
+	\item $\gamma$ is the \gls{MDP} discount factor
+ \end{itemize}
+
+Given these notations, we know a few more things:
+\begin{itemize}
+		\item Bellman operator $\mathbf{B}_\pi$ on $\mathbf{v}$ given policy $\pi$ can be defined as:
+	\begin{equation}
+	\mathbf{B}_{\pi} \mathbf{v}=\mathbf{R}_{\pi}+\gamma \mathbf{P}_{\pi} \cdot \mathbf{v}
+	\end{equation}
+	\item Subspace of \gls{VF} can be denoted as $\mathbf{\Phi}$, and the projection operator that does orthogonal project of \gls{VF} onto $\mathbf{\Phi}$ can be written as:
+	\begin{equation}
+	\boldsymbol{\Pi}_{\boldsymbol{\Phi}}=\boldsymbol{\Phi} \cdot\left(\boldsymbol{\Phi}^{T} \cdot \mathbf{D} \cdot \boldsymbol{\Phi}\right)^{-1} \cdot \boldsymbol{\Phi}^{T} \cdot \mathbf{D}
+	\end{equation}
+	\item The \textit{distance} between \gls{VF} vectors $\mathbf{v}_1$ and $\mathbf{v}_2$ is $d(\mathbf{v}_1, \mathbf{v}_2)$. Weighted by $\mu_\pi$ across $n$ dimensions, the distance can be written as:
+	\begin{equation}
+	d\left(\mathbf{v}_{1}, \mathbf{v}_{2}\right)=\sum_{i=1}^{n} \mu_{\pi}\left(s_{i}\right) \cdot\left(\mathbf{v}_{1}\left(s_{i}\right)-\mathbf{v}_{2}\left(s_{i}\right)\right)^{2}=\left(\mathbf{v}_{1}-\mathbf{v}_{2}\right)^{T} \cdot \mathbf{D} \cdot\left(\mathbf{v}_{1}-\mathbf{v}_{2}\right)
+	\end{equation}
+	where $\mathbf{D}$ is the square diagonal matrix.
+\end{itemize}
+
+Therefore we can solve for Linear Systems for Bellman Error-minimization as:
+\begin{equation}
+\begin{aligned}
+\mathbf{w}_{B E} &=\underset{\mathbf{w}}{\arg \min } d\left(\mathbf{v}_{\mathbf{w}}, \mathbf{R}_{\pi}+\gamma \mathbf{P}_{\pi} \cdot \mathbf{v}_{\mathbf{w}}\right) \\
+&=\underset{\mathbf{w}}{\arg \min } d\left(\mathbf{\Phi} \cdot \mathbf{w}, \mathbf{R}_{\pi}+\gamma \mathbf{P}_{\pi} \cdot \mathbf{\Phi} \cdot \mathbf{w}\right) \\
+&=\underset{\mathbf{w}}{\arg \min } d\left(\mathbf{\Phi} \cdot \mathbf{w}-\gamma \mathbf{P}_{\pi} \cdot \mathbf{\Phi} \cdot \mathbf{w}, \mathbf{R}_{\pi}\right) \\
+&=\underset{\mathbf{w}}{\arg \min } d\left(\left(\mathbf{\Phi}-\gamma \mathbf{P}_{\pi} \cdot \mathbf{\Phi}\right) \cdot \mathbf{w}, \mathbf{R}_{\pi}\right)
+\end{aligned}
+\end{equation}
+With this, we can solve for a weighted least-square linear regression and get the solution as:
+\begin{equation}
+w_{B E}=\left(\left(\boldsymbol{\Phi}-\gamma \mathbf{P}_{\pi} \cdot \boldsymbol{\Phi}\right)^{T} \cdot \mathbf{D} \cdot\left(\boldsymbol{\Phi}-\gamma \mathbf{P}_{\pi} \cdot \boldsymbol{\Phi}\right)\right)^{-1} \cdot\left(\boldsymbol{\Phi}-\gamma \mathbf{P}_{\pi} \cdot \boldsymbol{\Phi}\right)^{T} \cdot \mathbf{D} \cdot \mathbf{R}_{\pi}
+\end{equation}
+
+We can also solve for Linear Systems for Projected Bellman Error-minimization. Writing out the formulation for $\mathbf{\Pi}_{\Phi}$ and $\mathbf{B}_{\pi}$, we have:
+\begin{align}
+\mathbf{\Pi}_{\boldsymbol{\Phi}}=\boldsymbol{\Phi} \cdot\left(\boldsymbol{\Phi}^{T} \cdot \mathbf{D} \cdot \boldsymbol{\Phi}\right)^{-1} \cdot \boldsymbol{\Phi}^{T} \cdot \mathbf{D} \\
+\mathbf{B}_{\pi} \mathbf{v}=\mathbf{R}_{\pi}+\gamma \mathbf{P}_{\pi} \cdot \mathbf{v}
+\end{align}
+
+Since $\mathbf{\Phi} \cdot \mathbf{w}_{P B E}$ is the fixed point of operator $\mathbf{\Pi}_{\Phi} \cdot \mathbf{B}_{\pi}$, combining the two equations above, we can write:
+\begin{equation}
+	\boldsymbol{\Phi} \cdot\left(\boldsymbol{\Phi}^{T} \cdot \mathbf{D} \cdot \boldsymbol{\Phi}\right)^{-1} \cdot \boldsymbol{\Phi}^{T} \cdot \mathbf{D} \cdot\left(\mathbf{R}_{\pi}+\gamma \mathbf{P}_{\pi} \cdot \boldsymbol{\Phi} \cdot \mathbf{w}_{P B E}\right)=\boldsymbol{\Phi} \cdot \mathbf{w}_{P B E}
+\end{equation}
+
+If columns of $\Phi$ are assumed to be independent, we can expand the above equations to be:
+\begin{equation}
+	\begin{aligned}
+	\left(\boldsymbol{\Phi}^{T} \cdot \mathbf{D} \cdot \boldsymbol{\Phi}\right)^{-1} \cdot \boldsymbol{\Phi}^{T} \cdot \mathbf{D} \cdot\left(\mathbf{R}_{\pi}+\gamma \mathbf{P}_{\pi} \cdot \boldsymbol{\Phi} \cdot \mathbf{w}_{P B E}\right) &=\mathbf{w}_{P B E} \\
+	\boldsymbol{\Phi}^{T} \cdot \mathbf{D} \cdot\left(\mathbf{R}_{\pi}+\gamma \mathbf{P}_{\pi} \cdot \boldsymbol{\Phi} \cdot \mathbf{w}_{P B E}\right) &=\boldsymbol{\Phi}^{T} \cdot \mathbf{D} \cdot \boldsymbol{\Phi} \cdot \mathbf{w}_{P B E} \\
+	\boldsymbol{\Phi}^{T} \cdot \mathbf{D} \cdot\left(\boldsymbol{\Phi}-\gamma \mathbf{P}_{\pi} \cdot \boldsymbol{\Phi}\right) \cdot \mathbf{w}_{P B E} &=\boldsymbol{\Phi}^{T} \cdot \mathbf{D} \cdot \mathbf{R}_{\pi}
+	\end{aligned}
+\end{equation}
+
+We can see that this is a square linear system with the form $\mathbf{A} \cdot \mathbf{w}_{P B E}=\mathbf{b}$, and the solution to equations with this form is:
+\begin{equation}
+	\mathbf{w}_{P B E}=\mathbf{A}^{-1} \cdot \mathbf{b}=\left(\mathbf{\Phi}^{T} \cdot \mathbf{D} \cdot\left(\boldsymbol{\Phi}-\gamma \mathbf{P}_{\pi} \cdot \boldsymbol{\Phi}\right)\right)^{-1} \cdot \boldsymbol{\Phi}^{T} \cdot \mathbf{D} \cdot \mathbf{R}_{\pi}
+\end{equation}
+\end{solution}
+
+\end{document}
