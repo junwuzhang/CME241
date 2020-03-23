@@ -42,7 +42,7 @@ class mertonPortofolio():
     def getMertonReward(self, state: S) ->float :
         time = state[0]
         wealth = state[1]
-        if time == self.expiry - 1:
+        if time != self.expiry:
             if self.gamma == 0:
                 return np.log(wealth)
             else:
@@ -61,18 +61,21 @@ class mertonPortofolio():
         all_merton_states = []
         all_merton_states.append(state)
         while t < self.expiry:
-            state = all_merton_states.pop(0)
+            state = tuple(all_merton_states.pop(0))
             # assume for each state, there are two possible actions, each are generated randomly
             # this assumption is made so that we can simplify the MDP
-            action_1 = [random.uniform(0, 5), random.uniform(0, 5)]
-            action_2 = [random.uniform(0, 5), random.uniform(0, 5)]
-            state_action_relation[state] = {[action_1, action_2]}
+            action_1 = tuple([random.uniform(0, 5), random.uniform(0, 5)])
+            action_2 = tuple([random.uniform(0, 5), random.uniform(0, 5)])
+            action_list = [action_1, action_2]
+            state_action_relation[state] = action_list
 
-            next_state_1 = self.getMertonTransition(state, action_1)
-            next_state_2 = self.getMertonTransition(state, action_2)
+            next_state_1 = tuple(self.getMertonTransition(state, action_1))
+            next_state_2 = tuple(self.getMertonTransition(state, action_2))
+            sub_dict_1 , sub_dict_2 = {}, {}
             # sub_dict : Mapping[S, Tuple[float, float]]
-            sub_dict_1 = {next_state_1: (0.5, self.getMertonReward(state))}
-            sub_dict_2 = {next_state_2: (0.5, self.getMertonReward(state))}
+            sub_dict_1[next_state_1] = (0.5, self.getMertonReward(state))
+            sub_dict_2[next_state_2] = (0.5, self.getMertonReward(state))
+            
             state_action_nextstate_reward_relation[state] = {sub_dict_1, sub_dict_2}
             all_merton_states.append(next_state_1)
             all_merton_states.append(next_state_2)

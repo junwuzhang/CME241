@@ -1,9 +1,11 @@
 from typing import TypeVar, Sequence, Mapping, Set, Tuple
-import numpy as np
 from scipy.linalg import eig
 from base_files import mdp
-import random
 from base_files import value_iteration
+import numpy as np
+import random
+import copy
+import math
 
 S = Tuple[float, float]
 A = Tuple[float, float]
@@ -36,12 +38,12 @@ class mertonPortofolio():
         wealth_consumption = action[1]
         next_wealth = (wealth - wealth_consumption) * \
                     ((1 - risky_allocation) * (1 + self.r) + risky_allocation * (1 + risky_return))
-        return [state[0] + 1, next_wealth]
+        return [state[0] + 1, next_wealth[0]]
 
     def getMertonReward(self, state: S) ->float :
         time = state[0]
         wealth = state[1]
-        if time == self.expiry - 1:
+        if time != self.expiry:
             if self.gamma == 0:
                 return np.log(wealth)
             else:
@@ -58,16 +60,30 @@ class mertonPortofolio():
         all_merton_states = []
         all_merton_states.append(state)
         while t < self.expiry:
-            state = all_merton_states.pop(0)
+            state = tuple(all_merton_states.pop(0))
             # assume for each state, there are two possible actions, each are generated randomly
             # this assumption is made so that we can simplify the MDP
-            action_1 = [random.uniform(0, 5), random.uniform(0, 5)]
-            action_2 = [random.uniform(0, 5), random.uniform(0, 5)]
-            next_state_1 = self.getMertonTransition(state, action_1)
-            next_state_2 = self.getMertonTransition(state, action_2)
+            action_1 = tuple([random.uniform(0, 5), random.uniform(0, 5)])
+            action_2 = tuple([random.uniform(0, 5), random.uniform(0, 5)])
+            next_state_1 = tuple(self.getMertonTransition(state, action_1))
+            next_state_2 = tuple(self.getMertonTransition(state, action_2))
             sub_dict_1 = {action_1: {next_state_1: 1.0}}
             sub_dict_2 = {action_2: {next_state_2: 1.0}} 
-            transition_matrix[state] = {sub_dict_1, sub_dict_2}
+            if state in transition_matrix.keys():
+                list1 = list(transition_matrix.items())
+                list2 = list(sub_dict_1.items())
+                list1[0][1][list2[0][0]] = list2[0][1]
+                transition_matrix = dict(list1)
+                list1 = list(transition_matrix.items())
+                list2 = list(sub_dict_2.items())
+                list1[0][1][list2[0][0]] = list2[0][1]
+                transition_matrix = dict(list1)
+            else:
+                transition_matrix[state] = copy.deepcopy(sub_dict_1)
+                list1 = list(transition_matrix.items())
+                list2 = list(sub_dict_2.items())
+                list1[0][1][list2[0][0]] = list2[0][1]
+                transition_matrix = dict(list1)
             reward[state] = {action_1: self.getMertonReward(state), 
                              action_2: self.getMertonReward(state)}
             policy[state] = {action_1: 0.5, action_2: 0.5}
@@ -90,8 +106,13 @@ if __name__ == '__main__':
     initial_wealth = 10
     initial_state = [0, initial_wealth]
     transition_matrix, reward, policy = mp.getMertonDataAll(initial_state)
+    # print(policy)
 
     mdp = mdp.MDP(transition_matrix, reward, policy, discount_rate)
-    print("Value iteration: ", value_iteration.valueIteration(mdp, 100))
+    vi_dict = value_iteration.valueIteration(mdp, 100)[0]
+    new_dict = {}
+    for key, val in vi_dict.items():
+        if val != None and val != float('nan'):
+            new_dict[key] = val
+    print("Value iteration: ", new_dict)
 
-    

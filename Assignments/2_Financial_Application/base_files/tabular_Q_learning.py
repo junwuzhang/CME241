@@ -1,9 +1,9 @@
 from typing import TypeVar, Sequence, Mapping, Set, Tuple, Optional
 import numpy as np
 import random
-from tabular_RL import tabularRL
-from policy import Policy
-from helper import getLambdaReturn, getSingleRV, getEpsilonGreedyAction, getExpectedActionValue
+from base_files.tabular_RL import tabularRL
+from base_files.policy import Policy
+from base_files.helper import getLambdaReturn, getSingleRV, getEpsilonGreedyAction, getExpectedActionValue
 
 S = TypeVar('S')
 A = TypeVar('A')

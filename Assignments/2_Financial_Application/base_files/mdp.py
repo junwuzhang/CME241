@@ -1,8 +1,8 @@
 from typing import TypeVar, Sequence, Mapping, Set, Tuple
 import numpy as np
 from scipy.linalg import eig
-from mrp import MRP
-from policy import Policy
+from base_files.mrp import MRP
+from base_files.policy import Policy
 
 S = TypeVar('S')
 A = TypeVar('A')
@@ -99,6 +99,8 @@ class MDP(MRP):
         for s, _ in self.policy_data.items():
             for action, prob in self.policy_data[s].items():
                 for next_state in self.states:
+                    if action not in self.transition_data[s].keys():
+                        continue
                     if next_state in self.transition_data[s][action].keys():
                         tmp_value += self.state_value_functions[next_state] * self.transition_data[s][action][next_state]
                 if action in self.reward_data[s].keys():
@@ -115,6 +117,8 @@ class MDP(MRP):
                     for next_action in self.actions:
                         if next_action in self.policy_data[next_state] and self.action_value_functions[next_state].keys():
                             tmp_value += self.policy_data[next_state][next_action] * self.action_value_functions[next_state][next_action]
+                    if a not in self.transition_data[s].keys():
+                        continue
                     if next_state in self.transition_data[s][a].keys():
                         action_value_func[s][a] += tmp_value * self.transition_data[s][a][next_state]
                 action_value_func[s][a] = self.discount_factor * action_value_func[s][a] + self.reward_data[s][a]

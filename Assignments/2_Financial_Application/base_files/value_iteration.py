@@ -1,6 +1,6 @@
 from typing import TypeVar, Tuple, Mapping, Sequence
-from mdp import MDP
-from policy import Policy
+from base_files.mdp import MDP
+from base_files.policy import Policy
 import numpy as np
 
 S = TypeVar('S')
@@ -11,12 +11,15 @@ def valueIteration(mdp: MDP,
     count = 0
     optimal_policy = dict.fromkeys(mdp.non_terminal_states)
     final_value_function = mdp.getStateValueFunctions()
+    current_action_value = 0
     while count <= number_of_iterations:
         for state in mdp.non_terminal_states:
             value = 0
             for action in mdp.actions:
                 # action value function for action A
                 for next_state in mdp.states:
+                    if action not in mdp.transition_data[state].keys() or mdp.reward_data[state].keys():
+                        continue
                     if next_state in mdp.transition_data[state][action].keys():
                         value += mdp.transition_data[state][action][next_state] * mdp.getStateValueFunctions()[next_state]
                         current_action_value = mdp.reward_data[state][action] + mdp.discount_factor * value

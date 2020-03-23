@@ -1,7 +1,7 @@
 from typing import Mapping, TypeVar
 import numpy as np
 from scipy.linalg import eig
-from mp import MP
+from base_files.mp import MP
 
 S = TypeVar('S')
 A = TypeVar('A')
